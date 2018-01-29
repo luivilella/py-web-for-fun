@@ -1,10 +1,10 @@
 from sqlalchemy.orm.exc import NoResultFound
 from . import api
-from .utils import BaseView
+from ..common.views import BaseView
 from .authors_resource import AuthorResource
 
 
-class AuthorView(AuthorResource, BaseView):
+class AuthorView(BaseView):
     resource = AuthorResource()
 
     def get(self, author_id=None):

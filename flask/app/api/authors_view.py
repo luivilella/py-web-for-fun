@@ -47,6 +47,10 @@ class AuthorView(BaseView):
                 dict(errors=e.data_error), self.HTTP.BAD_REQUEST
             )
 
+    def delete(self, author_id):
+        self.resource.delete(author_id)
+        return self.json_response({}, self.HTTP.NO_CONTENT)
+
 
 view = AuthorView.as_view('AuthorView')
 api.add_url_rule('/authors', view_func=view)

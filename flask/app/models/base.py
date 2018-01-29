@@ -19,6 +19,12 @@ class BaseMixin:
         if auto_commit:
             self.session_commit()
 
+    def delete(self, auto_commit=True):
+        db.session.delete(self)
+
+        if auto_commit:
+            self.session_commit()
+
     @classmethod
     def create(cls, **kwargs):
         auto_commit = kwargs.pop('auto_commit', None)

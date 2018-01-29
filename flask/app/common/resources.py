@@ -50,3 +50,7 @@ class GenericResource:
         instance.create_or_update()
 
         return instance
+
+    def delete(self, obj_id):
+        instance = self.model.get_by(id=obj_id)
+        instance.delete()

@@ -3,8 +3,11 @@ ATTRS_TO_NEVER_UPDATE = {'id', '_sa_instance_state'}
 
 class GenericResource:
     model = NotImplemented
-    schema_detail = NotImplemented
-    schema_list = NotImplemented
+    serializer_class = NotImplemented
+
+    def __init__(self):
+        self.schema_detail = self.serializer_class()
+        self.schema_list = self.serializer_class(many=True)
 
     class InvalidData(Exception):
         def __init__(self, *args, **kwargs):

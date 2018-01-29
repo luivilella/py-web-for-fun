@@ -1,8 +1,15 @@
 from flask import request
 from sqlalchemy.orm.exc import NoResultFound
 from . import api
+from .authors_schema import AuthorSchema
+from ..models.authors import Author
+from ..common.resources import GenericResource
 from ..common.views import BaseView
-from .authors_resource import AuthorResource
+
+
+class AuthorResource(GenericResource):
+    model = Author
+    serializer_class = AuthorSchema
 
 
 class AuthorView(BaseView):

@@ -25,7 +25,3 @@ class AuthorSchema(ma.ModelSchema):
             'total_books',
             'last_book'
         )
-
-
-author_schema = AuthorSchema()
-authors_schema = AuthorSchema(many=True)

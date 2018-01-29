@@ -4,8 +4,8 @@ from ..models.authors import Author
 
 
 class AuthorSchema(ma.ModelSchema):
-
-    name = fields.Str()
+    id = fields.Int(dump_only=True)
+    name = fields.Str(required=True)
     email = fields.Email()
     created_at = fields.DateTime(dump_only=True)
     total_books = fields.Int(dump_only=True)

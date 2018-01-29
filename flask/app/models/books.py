@@ -9,5 +9,6 @@ class Book(BaseMixin, db.Model):
     title = db.Column(db.String(255))
     author_id = db.Column(db.Integer, db.ForeignKey('author.id'))
     author = db.relationship(
-        'Author', backref='books', foreign_keys=[author_id]
+        'Author', foreign_keys=[author_id],
+        backref=db.backref('books', lazy='dynamic'),
     )

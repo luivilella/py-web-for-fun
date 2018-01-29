@@ -1,3 +1,4 @@
+from flask import request
 from sqlalchemy.orm.exc import NoResultFound
 from . import api
 from ..common.views import BaseView
@@ -10,11 +11,29 @@ class AuthorView(BaseView):
     def get(self, author_id=None):
         if author_id:
             try:
-                return self.json_response(self.resource.detail(author_id))
+                return self.json_response(
+                    self.resource.detail(author_id), self.HTTP.OK
+                )
             except NoResultFound:
-                return self.json_response({}, 404)
+                return self.json_response(
+                    {}, self.HTTP.NOT_FOUND
+                )
 
-        return self.json_response(self.resource.list())
+        return self.json_response(
+            self.resource.list(), self.HTTP.OK
+        )
+
+    def post(self):
+        data = request.get_json()
+        try:
+            author = self.resource.create(data)
+            return self.json_response(
+                self.resource.obj2Dict(author), self.HTTP.CREATED
+            )
+        except self.resource.InvalidData as e:
+            return self.json_response(
+                dict(errors=e.data_error), self.HTTP.BAD_REQUEST
+            )
 
 
 view = AuthorView.as_view('AuthorView')

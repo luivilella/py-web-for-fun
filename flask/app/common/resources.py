@@ -1,24 +1,46 @@
+import sqlalchemy as sa
+from collections import Iterable
+
+
 ATTRS_TO_NEVER_UPDATE = {'id', '_sa_instance_state'}
 
 
 class GenericResource:
     model = NotImplemented
     serializer_class = NotImplemented
+    search_fields = NotImplemented
 
     def __init__(self):
         self.schema_detail = self.serializer_class()
         self.schema_list = self.serializer_class(many=True)
+        if self.search_fields and not isinstance(self.search_fields, Iterable):
+            self.search_fields = (self.search_fields,)
 
     class InvalidData(Exception):
         def __init__(self, *args, **kwargs):
             self.data_error = kwargs.pop('data_error')
             super().__init__(*args, **kwargs)
 
-    def list(self):
-        query = (
-            self.model.query
-            .order_by(self.model.id.asc())
-        )
+    def get_search_filters(self, search):
+        for field_name in self.search_fields:
+            field = getattr(self.model, field_name)
+            yield field.ilike('%{}%'.format(search))
+
+    def get_query(self, search=None, order_by=None):
+        query = self.model.query
+
+        if search and self.search_fields:
+            query = query.filter(
+                sa.or_(*list(self.get_search_filters(search)))
+            )
+
+        if not order_by:
+            query = query.order_by(sa.sql.text('id ASC'))
+
+        return query
+
+    def list(self, search=None, order_by=None):
+        query = self.get_query(search, order_by)
         return self.schema_list.dump(query).data
 
     def obj2Dict(self, obj):

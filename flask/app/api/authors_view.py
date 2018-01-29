@@ -10,6 +10,7 @@ from ..common.views import BaseView
 class AuthorResource(GenericResource):
     model = Author
     serializer_class = AuthorSchema
+    search_fields = ('name', 'email')
 
 
 class AuthorView(BaseView):
@@ -26,8 +27,10 @@ class AuthorView(BaseView):
                     {}, self.HTTP.NOT_FOUND
                 )
 
+        search = request.args.get('search')
         return self.json_response(
-            self.resource.list(), self.HTTP.OK
+            self.resource.list(search=search),
+            self.HTTP.OK
         )
 
     def post(self):

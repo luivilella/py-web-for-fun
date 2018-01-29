@@ -35,6 +35,18 @@ class AuthorView(BaseView):
                 dict(errors=e.data_error), self.HTTP.BAD_REQUEST
             )
 
+    def put(self, author_id):
+        data = request.get_json()
+        try:
+            author = self.resource.update(author_id, data)
+            return self.json_response(
+                self.resource.obj2Dict(author), self.HTTP.CREATED
+            )
+        except self.resource.InvalidData as e:
+            return self.json_response(
+                dict(errors=e.data_error), self.HTTP.BAD_REQUEST
+            )
+
 
 view = AuthorView.as_view('AuthorView')
 api.add_url_rule('/authors', view_func=view)

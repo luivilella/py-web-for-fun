@@ -33,3 +33,7 @@ class BaseMixin:
     @staticmethod
     def session_commit():
         db.session.commit()
+
+    @classmethod
+    def get_by(cls, **kwargs):
+        return cls.query.filter_by(**kwargs).one()

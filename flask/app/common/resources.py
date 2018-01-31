@@ -9,6 +9,7 @@ class GenericResource:
     model = NotImplemented
     serializer_class = NotImplemented
     search_fields = NotImplemented
+    order_fields = NotImplemented
 
     def __init__(self):
         self.schema_detail = self.serializer_class()
@@ -26,7 +27,17 @@ class GenericResource:
             field = getattr(self.model, field_name)
             yield field.ilike('%{}%'.format(search))
 
-    def get_query(self, search=None, order_by=None):
+    def get_ordering_fields(self, ordering):
+        for field_name in ordering.split(','):
+            order = 'asc'
+            if field_name.startswith('-'):
+                order = 'desc'
+                field_name = field_name[1:]
+
+            field = getattr(self.model, field_name)
+            yield getattr(field, order)()
+
+    def get_query(self, search=None, ordering=None):
         query = self.model.query
 
         if search and self.search_fields:
@@ -34,13 +45,17 @@ class GenericResource:
                 sa.or_(*list(self.get_search_filters(search)))
             )
 
-        if not order_by:
-            query = query.order_by(sa.sql.text('id ASC'))
+        if ordering and self.order_fields:
+            query = query.order_by(
+                *list(self.get_ordering_fields(ordering))
+            )
+        else:
+            query = query.order_by(*list(self.get_ordering_fields('-id')))
 
         return query
 
-    def list(self, search=None, order_by=None):
-        query = self.get_query(search, order_by)
+    def list(self, search=None, ordering=None):
+        query = self.get_query(search, ordering)
         return self.schema_list.dump(query).data
 
     def obj2Dict(self, obj):

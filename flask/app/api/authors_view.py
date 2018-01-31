@@ -11,6 +11,7 @@ class AuthorResource(GenericResource):
     model = Author
     serializer_class = AuthorSchema
     search_fields = ('name', 'email')
+    order_fields = ('name', 'email')
 
 
 class AuthorView(BaseView):
@@ -28,8 +29,9 @@ class AuthorView(BaseView):
                 )
 
         search = request.args.get('search')
+        ordering = request.args.get('ordering')
         return self.json_response(
-            self.resource.list(search=search),
+            self.resource.list(search=search, ordering=ordering),
             self.HTTP.OK
         )
 

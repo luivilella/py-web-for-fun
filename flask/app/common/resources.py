@@ -10,6 +10,7 @@ class GenericResource:
     serializer_class = NotImplemented
     search_fields = NotImplemented
     order_fields = NotImplemented
+    filter_fields = NotImplemented
 
     def __init__(self):
         self.schema_detail = self.serializer_class()
@@ -37,7 +38,14 @@ class GenericResource:
             field = getattr(self.model, field_name)
             yield getattr(field, order)()
 
-    def get_query(self, search=None, ordering=None):
+    def get_filter_fields(self, filters):
+        for field_name, value in (
+            row.split('=') for row in filters.split(',')
+        ):
+            field = getattr(self.model, field_name)
+            yield field == value
+
+    def get_query(self, search=None, filters=None, ordering=None):
         query = self.model.query
 
         if search and self.search_fields:
@@ -52,10 +60,17 @@ class GenericResource:
         else:
             query = query.order_by(*list(self.get_ordering_fields('-id')))
 
+        if filters and self.filter_fields:
+            query = query.filter(
+                *list(self.get_filter_fields(filters))
+            )
+
         return query
 
-    def list(self, search=None, ordering=None):
-        query = self.get_query(search, ordering)
+    def list(self, search=None, filters=None, ordering=None):
+        query = self.get_query(
+            search=search, filters=filters, ordering=ordering
+        )
         return self.schema_list.dump(query).data
 
     def obj2Dict(self, obj):

@@ -12,6 +12,7 @@ class AuthorResource(GenericResource):
     serializer_class = AuthorSchema
     search_fields = ('name', 'email')
     order_fields = ('name', 'email')
+    filter_fields = ('name', 'email')
 
 
 class AuthorView(BaseView):
@@ -30,8 +31,11 @@ class AuthorView(BaseView):
 
         search = request.args.get('search')
         ordering = request.args.get('ordering')
+        filters = request.args.get('filters')
         return self.json_response(
-            self.resource.list(search=search, ordering=ordering),
+            self.resource.list(
+                search=search, filters=filters, ordering=ordering
+            ),
             self.HTTP.OK
         )
 
